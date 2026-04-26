@@ -1,26 +1,26 @@
-# 🧠 Data Science Knowledge Base & ML Interview Questions
+# 🧠 База знаний по Data Science & Вопросы для интервью
 
-This repository is a structured **Obsidian Vault** containing deep-dive notes on Machine Learning, Deep Learning, and Data Science. It serves as the primary intelligence source for the [ML Interview Tool](https://github.com/loymeding/interview-tool).
+Этот репозиторий представляет собой структурированную базу знаний (**Obsidian Vault**) с глубокими заметками по Machine Learning, Deep Learning и Data Science. Она служит основным источником знаний для [ML Interview Tool](https://github.com/loymeding/interview-tool).
 
-## 🚀 Key Features
+## 🚀 Ключевые особенности
 
-*   **Semantic Structure**: Topics organized by domains (Classic ML, DL, Math, etc.) with interlinked concepts.
-*   **Interview Integration**: Automatically parsed by the Interview Simulator to generate technical questions.
-*   **Automatic Analytics**: Integrated with the simulator's analytics engine to track your progress directly in Obsidian.
-*   **Knowledge Cards**: Designed for quick review and deep understanding of "Senior-level" nuances.
+*   **Семантическая структура**: Темы организованы по доменам (Classic ML, DL, математика и т.д.) с перекрестными ссылками между концепциями.
+*   **Интеграция с интервьюером**: Инструмент симуляции автоматически парсит эти файлы для генерации реалистичных технических вопросов.
+*   **Автоматическая аналитика**: Интегрировано с движком аналитики симулятора — ваш прогресс отслеживается прямо здесь, в папке `📊 Аналитика`.
+*   **Карточки знаний**: Контент оптимизирован для быстрого повторения и глубокого понимания нюансов уровня Senior.
 
-## 🛠 Usage with Interview Tool
+## 🛠 Использование с Interview Tool
 
-To use this knowledge base for your mock interviews:
-1. Point the `vault_path` in the Interview Tool to this directory.
-2. The tool will scan all `.md` files and populate the topic list.
-3. Your performance results will be automatically written to the `📊 Аналитика` folder within this vault.
+Чтобы использовать эту базу в своих тренировочных интервью:
+1. Укажите путь к этой папке в настройках [ML Interview Tool](https://github.com/loymeding/interview-tool).
+2. Скрипт просканирует все `.md` файлы и сформирует список тем для подготовки.
+3. Результаты ваших ответов будут автоматически записываться в папку `📊 Аналитика` внутри этого хранилища, формируя дашборд прогресса.
 
-## 📁 Directory Structure
-*   `Classic Machine Learning/` — Core ML algorithms and theory.
-*   `Deep Learning/` — Neural networks, architectures, and frameworks.
-*   `📊 Аналитика/` — Automated dashboard and per-topic progress tracking.
-*   `🏠 База знаний.md` — Central entry point.
+## 📁 Структура директорий
+*   `Classic Machine Learning/` — Основы ML, алгоритмы и теория.
+*   `Deep Learning/` — Нейронные сети, архитектуры и фреймворки.
+*   `📊 Аналитика/` — Автоматический дашборд и отслеживание прогресса по каждой теме.
+*   `🏠 База знаний.md` — Главная точка входа.
 
 ---
-*Created and maintained as a companion to the Advanced ML Interview Simulator.*
+*Создано и поддерживается как дополнение к продвинутому симулятору ML-интервью.*
