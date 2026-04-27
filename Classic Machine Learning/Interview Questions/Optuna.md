@@ -1,15 +1,14 @@
 ---
 topic: Optuna
 card_ref: "[[Optuna]]"
-generated: 2026-04-25
+generated: 2026-04-27
 ---
-
-You've hit your limit · resets 3:40am (Europe/Moscow)
 
 ## Q001
 type: fact
 difficulty: junior
 key_concepts: [TPE, байесовская оптимизация, поиск гиперпараметров]
+optional_concepts: [Tree-structured Parzen Estimator, Gaussian Processes как альтернатива]
 text: Объясните своими словами, в чем принципиальное отличие стратегии выбора следующей точки для поиска гиперпараметров у Optuna по сравнению с Random Search?
 follow_up:
   - Как именно Optuna использует информацию о «хороших» и «плохих» результатах прошлых попыток?
@@ -18,6 +17,7 @@ follow_up:
 type: compare
 difficulty: middle
 key_concepts: [Grid Search, Optuna, эффективность, размерность пространства]
+optional_concepts: [Sobol sequences, Halton sequences для квазислучайного поиска]
 text: Почему при увеличении количества подбираемых гиперпараметров Grid Search становится практически непригодным, а Optuna сохраняет эффективность?
 follow_up:
   - Существуют ли сценарии, где Grid Search всё же может быть предпочтительнее Optuna?
@@ -26,6 +26,7 @@ follow_up:
 type: scenario
 difficulty: middle
 key_concepts: [pruning, early stopping, вычислительный бюджет, сходимость]
+optional_concepts: [MedianPruner, HyperbandPruner, интеграция с PyTorch Lightning/Keras]
 text: Вы обучаете глубокую нейронную сеть, и каждый trial занимает около 4 часов. Вы решили внедрить pruning. Опишите, как именно вы реализуете этот механизм в коде и на что нужно обратить внимание при выборе порога остановки, чтобы не «убить» потенциально успешную модель?
 follow_up:
   - Как убедиться, что раннее прекращение обучения не привело к недообучению модели, которая могла бы показать лучший результат на поздних эпохах?
@@ -34,6 +35,7 @@ follow_up:
 type: trap
 difficulty: senior
 key_concepts: [data leakage, кросс-валидация, оптимизация гиперпараметров]
+optional_concepts: [nested cross-validation, влияние подбора параметров на смещение оценки качества]
 text: Представьте ситуацию: вы используете Optuna для подбора параметров модели на всей обучающей выборке, используя только внутреннюю метрику (например, logloss) без явного разделения на валидационный сет или кросс-валидацию. Почему это является критической ошибкой, даже если Optuna находит гиперпараметры, дающие «идеальный» результат?
 follow_up:
   - Как правильно организовать процесс подбора гиперпараметров, чтобы избежать переобучения под валидационную выборку?
@@ -42,6 +44,7 @@ follow_up:
 type: chain
 difficulty: senior
 key_concepts: [TPE, распределение вероятностей, exploration vs exploitation]
+optional_concepts: [Expected Improvement (EI), квантильное разделение (gamma parameter)]
 text: Алгоритм TPE строит два распределения $l(x)$ и $g(x)$. Что произойдет с поиском, если $l(x)$ станет очень узким в окрестности какой-то точки? Как это соотносится с проблемой баланса между exploration (исследованием) и exploitation (использованием найденного)?
 follow_up:
   - Как Optuna гарантирует, что мы не застрянем в локальном оптимуме и продолжим исследовать другие области пространства гиперпараметров?

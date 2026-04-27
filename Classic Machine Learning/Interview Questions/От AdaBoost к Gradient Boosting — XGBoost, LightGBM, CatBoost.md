@@ -1,13 +1,14 @@
 ---
 topic: От AdaBoost к Gradient Boosting — XGBoost, LightGBM, CatBoost
 card_ref: "[[От AdaBoost к Gradient Boosting — XGBoost, LightGBM, CatBoost]]"
-generated: 2026-04-24
+generated: 2026-04-27
 ---
 
 ## Q001
 type: fact
 difficulty: junior
 key_concepts: [экспоненциальная функция потерь, бинарная классификация, чувствительность к выбросам, ограничения AdaBoost]
+optional_concepts: [SAMME, SAMME.R для мультикласса]
 text: Какую функцию потерь использует AdaBoost и какие ограничения из этого следуют?
 follow_up:
   - Что произойдёт с весами объектов-выбросов после нескольких итераций AdaBoost и почему это проблема?
@@ -17,6 +18,7 @@ follow_up:
 type: compare
 difficulty: middle
 key_concepts: [перевзвешивание объектов, псевдо-остатки, антиградиент, обобщение на произвольные функции потерь]
+optional_concepts: [AnyBoost, функциональный градиентный спуск]
 text: В чём принципиальное отличие механизма улучшения в AdaBoost от Gradient Boosting? Почему говорят, что AdaBoost — это частный случай Gradient Boosting?
 follow_up:
   - Какое конкретное значение loss нужно подставить в GBM, чтобы воспроизвести AdaBoost?
@@ -26,6 +28,7 @@ follow_up:
 type: scenario
 difficulty: middle
 key_concepts: [гистограммный метод LightGBM, обработка пропусков XGBoost, скорость обучения, GOSS]
+optional_concepts: [EFB (Exclusive Feature Bundling), MVS (Minimal Variance Sampling)]
 text: У вас датасет с 10 миллионами строк, 500 признаками и примерно 15% пропущенных значений. Нужно обучить бустинг-модель за разумное время без предварительной импутации. Какой фреймворк выберете и почему?
 follow_up:
   - Как именно XGBoost обрабатывает пропуски во время построения сплита?
@@ -35,6 +38,7 @@ follow_up:
 type: trap
 difficulty: senior
 key_concepts: [эквивалентность весов и антиградиента, частный случай GBM, нормировка весов, псевдо-остатки]
+optional_concepts: [связь экспоненциального лосса и логистического]
 text: Коллега утверждает: «Веса объектов в AdaBoost — это то же самое, что псевдо-остатки в Gradient Boosting, просто записанные иначе». Согласны ли вы с этим утверждением?
 follow_up:
   - Чем семантически отличается «перевзвешенный объект» от «остатка», на который настраивается следующее дерево?
@@ -44,6 +48,7 @@ follow_up:
 type: chain
 difficulty: senior
 key_concepts: [гессиан, кривизна функции потерь, оптимальный вес листа, регуляризация XGBoost]
+optional_concepts: [Taylor expansion 2nd order, Gain formula в XGBoost]
 text: Объясните, зачем XGBoost использует разложение Тейлора второго порядка вместо первого. Что даёт гессиан и как он влияет на формулу оптимального значения листа?
 follow_up:
   - Запишите формулу оптимального значения листа в XGBoost с учётом λ-регуляризации и объясните роль каждого слагаемого.
