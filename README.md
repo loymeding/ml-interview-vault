@@ -1,6 +1,6 @@
 # 🧠 База знаний по Data Science & Вопросы для интервью
 
-Этот репозиторий представляет собой структурированную базу знаний (**Obsidian Vault**) с глубокими заметками по Machine Learning, Deep Learning и Data Science. Она администрируется ИИ-агентами и служит основным источником знаний для [ML Interview Tool](https://github.com/loymeding/interview-tool).
+Этот репозиторий представляет собой структурированную базу знаний (**Obsidian Vault**) с глубокими заметками по Data Science. Она администрируется ИИ-агентами и служит основным источником знаний для [ML Interview Tool](https://github.com/loymeding/interview-tool).
 
 ## 🚀 Ключевые особенности
 
