@@ -123,3 +123,7 @@ $$\Large \nabla_{X_0} f = -\text{softmax}(X_0) \odot \text{sum}(\dots) + \text{s
 - Яндекс Хендбук по машинному обучению
 - Интенсив "Основы глубокого обучения", MADE
 - "Deep Learning" (Ian Goodfellow)
+
+
+---
+[[🗺️ Индекс|Назад к разделу]]

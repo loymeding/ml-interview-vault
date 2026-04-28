@@ -89,3 +89,7 @@ model = nn.Sequential(
 - Тонкости обучения
 - 🎯 General Recap_ Тонкости обучения.pdf
 - [1502.03167] Batch Normalization
+
+
+---
+[[🗺️ Индекс|Назад к разделу]]

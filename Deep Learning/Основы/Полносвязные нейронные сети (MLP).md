@@ -105,3 +105,7 @@ class FullyConnectedNet(nn.Module):
 
 - [Первое знакомство с полносвязными нейросетями](https://education.yandex.ru/handbook/ml)
 - Полносвязные сети и backprop.pdf
+
+
+---
+[[🗺️ Индекс|Назад к разделу]]

@@ -89,3 +89,7 @@ optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
 - 🎯 General Recap_ Тонкости обучения.pdf
 - Алгоритмы градиентного спуска (База знаний)
+
+
+---
+[[🗺️ Индекс|Назад к разделу]]

@@ -10,7 +10,7 @@ tags: [модели, random-forest, bagging, rsm, oob, ансамбли]
   - "Тренировки по ML — лекция 4"
   - "Яндекс Handbook — решающие деревья"
   - "Яндекс Handbook — ансамбли"
-  - "Вопросы по ML-совмещенный"
+  - "Банк вопросов"
 предпосылки:
   - "Типы признаков и кодирование"
   - "Метрики бинарной классификации"
@@ -135,5 +135,9 @@ $$\mathbb{V}[a(x)] = \rho \sigma^2 + \frac{1-\rho}{k} \sigma^2$$
 - [Тренировки по ML — лекция 4](https://www.youtube.com/@Young_and_Yandex)
 - [Яндекс Handbook — решающие деревья](https://education.yandex.ru/handbook/ml/article/reshayushchiye-derevya)
 - [Яндекс Handbook — ансамбли](https://education.yandex.ru/handbook/ml/article/ansambli-v-mashinnom-obuchenii)
-- [[Вопросы по ML-совмещенный]]
+- [[Банк вопросов]]
 
+
+
+---
+[[🗺️ Индекс|Назад к разделу]]
