@@ -42,7 +42,7 @@ tags: [нейронные-сети, регуляризация, dropout, анс�
 ## Формула / Схема
 
 **На обучении:**
-$$y = \frac{1}{1-p} \cdot x \odot \text{mask}, \quad \text{mask} \sim \text{Bernoulli}(1-p)$$
+$$ \Large y = \frac{1}{1-p} \cdot x \odot \text{mask}, \quad \text{mask} \sim \text{Bernoulli}(1-p)$$
 
 ## Короткий пример
 

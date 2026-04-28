@@ -43,8 +43,8 @@ tags: [нейронные-сети, оптимизация, градиентны
 
 ## Формула / Схема
 
-- **Momentum:** $v_t = \beta v_{t-1} + (1-\beta)g_t \quad \Rightarrow \quad \theta \leftarrow \theta - \eta v_t$
-- **Adam:** $\theta \leftarrow \theta - \frac{\eta \hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$ (использует два «момента» — среднее градиента и среднее квадрата градиента).
+- **Momentum:** $\Large v_t = \beta v_{t-1} + (1-\beta)g_t \quad \Rightarrow \quad \theta \leftarrow \theta - \eta v_t$
+- **Adam:** $\Large \theta \leftarrow \theta - \frac{\eta \hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$ (использует два «момента» — среднее градиента и среднее квадрата градиента).
 
 ## Короткий пример
 

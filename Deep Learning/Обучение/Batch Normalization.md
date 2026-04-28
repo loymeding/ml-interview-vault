@@ -43,7 +43,7 @@ tags: [нейронные-сети, нормализация, batch-normalizatio
 
 ## Формула / Схема
 
-$$X_{norm} = \frac{X - \mu_{batch}}{\sqrt{\sigma^2_{batch} + \epsilon}}, \quad Y = \gamma X_{norm} + \beta$$
+$$\Large X_{norm} = \frac{X - \mu_{batch}}{\sqrt{\sigma^2_{batch} + \epsilon}}, \quad Y = \gamma X_{norm} + \beta$$
 
 ## Короткий пример
 
