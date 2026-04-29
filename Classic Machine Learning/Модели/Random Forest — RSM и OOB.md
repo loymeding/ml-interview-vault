@@ -32,11 +32,21 @@ tags: [модели, random-forest, bagging, rsm, oob, ансамбли]
 
 Снижение дисперсии при усреднении $T$ некоррелированных моделей:
 
-$$\text{Var}\left(\frac{1}{T}\sum_t \hat{y}_t\right) = \frac{\sigma^2}{T}$$
+$$\Large \text{Var}\left(\frac{1}{T}\sum_t \hat{y}_t\right) = \frac{\sigma^2}{T}$$
+
+Где:
+- $\Large \text{Var}$ — дисперсия (variance) ансамбля.
+- $\Large T$ — количество деревьев в ансамбле.
+- $\Large \sigma^2$ — дисперсия отдельного дерева.
 
 Но при корреляции $\rho$ между моделями:
 
-$$\text{Var} = \rho \sigma^2 + \frac{1-\rho}{T} \sigma^2$$
+$$\Large \text{Var} = \rho \sigma^2 + \frac{1-\rho}{T} \sigma^2$$
+
+Где:
+- $\Large \rho$ — коэффициент корреляции между деревьями.
+- $\Large \sigma^2$ — дисперсия отдельного дерева.
+- $\Large T$ — количество деревьев.
 
 При $\rho \to 1$ (все деревья одинаковые): выигрыша нет, остаётся $\sigma^2$.
 
@@ -81,7 +91,13 @@ Bootstrap выборка для каждого дерева включает **~
 
 Пусть ансамбль $a(x) = \frac{1}{k}\sum_{i=1}^k b_i(x)$. Раскрываем дисперсию:
 
-$$\mathbb{V}[a(x)] = \frac{1}{k^2}\left(\sum_{i=1}^k \mathbb{V}[b_i] + \sum_{i \neq j} \text{cov}(b_i, b_j)\right)$$
+$$\Large \mathbb{V}[a(x)] = \frac{1}{k^2}\left(\sum_{i=1}^k \mathbb{V}[b_i] + \sum_{i \neq j} \text{cov}(b_i, b_j)\right)$$
+
+Где:
+- $\Large \mathbb{V}[a(x)]$ — дисперсия ансамбля.
+- $\Large k$ — количество базовых моделей.
+- $\Large \mathbb{V}[b_i]$ — дисперсия $i$-й модели.
+- $\Large \text{cov}(b_i, b_j)$ — ковариация (степень зависимости) между моделями.
 
 **Идеальный случай** (некоррелированные деревья, $\text{cov} = 0$):
 
@@ -91,7 +107,12 @@ $$\mathbb{V}[a(x)] = \frac{1}{k^2} \cdot k \cdot \mathbb{V}[b] = \frac{\mathbb{V
 
 **Реальный случай** (деревья коррелированы из-за пересечения bootstrap-выборок):
 
-$$\mathbb{V}[a(x)] = \rho \sigma^2 + \frac{1-\rho}{k} \sigma^2$$
+$$\Large \mathbb{V}[a(x)] = \rho \sigma^2 + \frac{1-\rho}{k} \sigma^2$$
+
+Где:
+- $\Large \rho$ — средняя корреляция между парами моделей.
+- $\Large \sigma^2$ — дисперсия отдельной модели.
+- $\Large k$ — количество моделей.
 
 Здесь $\rho > 0$ — нижний предел дисперсии, не зависящий от $k$. Именно поэтому RSM критичен: он снижает $\rho$, позволяя усреднению работать эффективнее.
 
