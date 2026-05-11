@@ -1,6 +1,6 @@
 ---
 topic: Механизм внимания (Attention и Self-Attention)
-card_ref: "[[Механизм внимания (Attention и Self-Attention)]]"
+card_ref: "[[NLP/Interview Questions/Механизм внимания (Attention и Self-Attention)]]"
 generated: 2026-04-29
 ---
 

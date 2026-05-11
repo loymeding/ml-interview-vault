@@ -32,10 +32,53 @@ tags: [нейронные-сети, autograd, вычислительный-гр�
 1. **Динамическое построение:** Во время прямого прохода (`forward`) Autograd запоминает последовательность операций и кэширует промежуточные результаты.
 2. **Автоматический Backward:** При вызове `.backward()` система обходит граф от функции потерь к входам, перемножая локальные производные на глобальные градиенты.
 
+**Режимы модели: model.train() и model.eval()**
+
+Эти вызовы обходят все модули и меняют их **внутреннее состояние**. Для большинства слоёв это ничего не значит, но для двух — критично:
+
+- **Dropout:** в `.train()` зануляет нейроны со случайной маской и делит на $(1-p)$; в `.eval()` пропускает весь сигнал без изменений.
+- **BatchNorm:** в `.train()` нормирует по текущему батчу и обновляет бегущие средние $\mu_{EMA}$, $\sigma_{EMA}$; в `.eval()` использует только накопленные статистики.
+
+> [!warning] Частая путаница
+> `model.eval()` **не** отключает вычислительный граф! Он меняет только логику Dropout/BN. Чтобы отключить граф и сэкономить VRAM, нужен именно `torch.no_grad()`.
+
+**Жизненный цикл на GPU: .to(device)**
+
+Фреймворк не переносит данные на GPU автоматически. Модель (её веса) и тензоры данных должны находиться в **одной памяти**. Если модель на `cuda:0`, а батч остался на CPU, PyTorch выдаст ошибку при Forward Pass.
+
 ## Формула / Схема
 
 Схема для $f(x, y) = (x + y) \cdot y$:
 $$x, y \to [+] \to q \to [\times y] \to f$$
+
+**Золотой стандарт — скелет цикла обучения и валидации в PyTorch:**
+
+```python
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = model.to(device)
+
+for epoch in range(num_epochs):
+    # --- ОБУЧЕНИЕ ---
+    model.train()   # Dropout включён, BN работает по батчу
+    for inputs, labels in train_loader:
+        inputs, labels = inputs.to(device), labels.to(device)
+        optimizer.zero_grad()       # Обнуляем накопленные градиенты
+        outputs = model(inputs)     # Forward pass (строится граф)
+        loss = criterion(outputs, labels)
+        loss.backward()             # Backward pass (считаются ∂L/∂W)
+        optimizer.step()            # Шаг весов
+        total_loss += loss.item()   # .item() отрывает тензор от графа!
+
+    # --- ВАЛИДАЦИЯ ---
+    model.eval()                    # Dropout off, BN → бегущие средние
+    with torch.no_grad():           # Граф не строится → экономия VRAM
+        for inputs, labels in val_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            # ... подсчёт метрик
+
+    scheduler.step()  # Один раз в ЭПОХУ, не в батче
+```
 
 ## Короткий пример
 
