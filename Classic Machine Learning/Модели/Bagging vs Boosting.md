@@ -117,6 +117,7 @@ Bootstrap → Дерево N  ┘
 - [[Решающие деревья]]
 - [[Random Forest — RSM и OOB]]
 - [[Feature Importance]]
+- [[Classic Machine Learning/Модели/Ансамблевые методы — Bagging, Boosting, Stacking, Blending|Ансамблевые методы — Bagging, Boosting, Stacking, Blending (расширенная)]]
 
 ## Сравнить с
 
