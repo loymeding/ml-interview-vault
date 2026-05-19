@@ -12,6 +12,7 @@ tags: [nlp, llm, gpt-2, zero-shot, prompting, webtext, bpe, pre-layernorm]
   - "Эволюция GPT — Обучение без учителя как сжатие данных (GPT-1)"
 связано:
   - "GPT-3 — Sparse Attention и In-Context Learning"
+  - "Системные и специальные токены в языковых моделях"
 сравнить-с:
   - "Transfer Learning в NLP и семейство BERT"
 ---
@@ -100,6 +101,7 @@ $$W_{\text{residual}} \sim \mathcal{N}\!\left(0,\; \frac{\sigma^2}{2N}\right)$$
 ## Связано
 
 - [[NLP/LLM и Промпт-инжиниринг/GPT-3 — Sparse Attention и In-Context Learning]]
+- [[NLP/LLM и Промпт-инжиниринг/Системные и специальные токены в языковых моделях]]
 
 ## Сравнить с
 

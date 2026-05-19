@@ -12,6 +12,7 @@ tags: [nlp, llm, scaling-laws, openai, chinchilla, deepmind, compute, overtraini
   - "GPT-3 — Sparse Attention и In-Context Learning"
 связано:
   - "Эволюция GPT — Обучение без учителя как сжатие данных (GPT-1)"
+  - "Эволюция и архитектура LLaMA"
 сравнить-с: []
 ---
 
@@ -97,6 +98,7 @@ $$\Large N_{\text{opt}} \propto C^{0.5}, \qquad D_{\text{opt}} \propto C^{0.5}$$
 ## Связано
 
 - [[NLP/LLM и Промпт-инжиниринг/Эволюция GPT — Обучение без учителя как сжатие данных (GPT-1)]]
+- [[NLP/LLM и Промпт-инжиниринг/Эволюция и архитектура LLaMA]]
 
 ## Источники
 
