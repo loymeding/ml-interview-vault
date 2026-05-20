@@ -13,6 +13,8 @@ Thumbs.db
 *.log
 .stfolder/
 .stversions/
+.trash/
+.claude/
 
 # Raw notes
 Сырой текст к карточкам.txt
