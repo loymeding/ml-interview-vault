@@ -27,17 +27,17 @@ tags: []
 
 ## Формула
 
-$$\mathcal{L} = -\frac{1}{n}\sum_{i=1}^n \left[ y_i \log(\hat{p}_i) + (1 - y_i) \log(1 - \hat{p}_i) \right]$$
+$$\Large\mathcal{L} = -\frac{1}{n}\sum_{i=1}^n \left[ y_i \log(\hat{p}_i) + (1 - y_i) \log(1 - \hat{p}_i) \right]$$
 
 Для одного объекта:
-- Если $y=1$: штраф = $-\log(\hat{p})$
-- Если $y=0$: штраф = $-\log(1 - \hat{p})$
+- Если $\Large y=1$: штраф = $\Large-\log(\hat{p})$
+- Если $\Large y=0$: штраф = $\Large-\log(1 - \hat{p})$
 
 ## Почему логарифм?
 
 **1. Численная стабильность и масштаб:** произведение многих малых вероятностей уходит в ноль. Логарифм переводит произведение в сумму:
 
-$$\log \prod_i P(y_i \mid x_i) = \sum_i \log P(y_i \mid x_i)$$
+$$\Large\log \prod_i P(y_i \mid x_i) = \sum_i \log P(y_i \mid x_i)$$
 
 **2. Связь с правдоподобием:** Log Loss = отрицательное среднее log-правдоподобие. Минимизация Log Loss = максимизация правдоподобия данных (MLE).
 
@@ -64,17 +64,17 @@ $$\log \prod_i P(y_i \mid x_i) = \sum_i \log P(y_i \mid x_i)$$
 
 **Шаг 1 — правдоподобие:** при допущении IID полная вероятность = **произведение** по объектам:
 
-$$\mathcal{L}(\theta) = \prod_{i=1}^n P(y_i \mid x_i, \theta)$$
+$$\Large\mathcal{L}(\theta) = \prod_{i=1}^n P(y_i \mid x_i, \theta)$$
 
-Для бинарной классификации $P(y_i \mid x_i) = \hat{p}_i^{y_i}(1 - \hat{p}_i)^{1-y_i}$.
+Для бинарной классификации $\Large P(y_i \mid x_i) = \hat{p}_i^{y_i}(1 - \hat{p}_i)^{1-y_i}$.
 
 **Шаг 2 — логарифм:** произведение уходит в машинный ноль при большом $n$. Логарифм превращает произведение в **сумму**:
 
-$$\log \mathcal{L}(\theta) = \sum_{i=1}^n \left[ y_i \log \hat{p}_i + (1-y_i) \log(1 - \hat{p}_i) \right]$$
+$$\Large \log \mathcal{L}(\theta) = \sum_{i=1}^n \left[ y_i \log \hat{p}_i + (1-y_i) \log(1 - \hat{p}_i) \right]$$
 
-**Шаг 3 — минимизация:** максимизировать $\log \mathcal{L}$ = минимизировать $-\log \mathcal{L}$, нормированный на $n$:
+**Шаг 3 — минимизация:** максимизировать $\Large \log \mathcal{L}$ = минимизировать $\Large -\log \mathcal{L}$, нормированный на $n$:
 
-$$\text{Log Loss} = -\frac{1}{n} \sum_{i=1}^n \left[ y_i \log \hat{p}_i + (1-y_i) \log(1 - \hat{p}_i) \right]$$
+$$\Large \text{Log Loss} = -\frac{1}{n} \sum_{i=1}^n \left[ y_i \log \hat{p}_i + (1-y_i) \log(1 - \hat{p}_i) \right]$$
 
 > [!tip] Вывод
 > Log Loss — это **отрицательное среднее log-правдоподобие** при распределении Бернулли. Минимизация Log Loss точно соответствует принципу MLE.
@@ -83,7 +83,7 @@ $$\text{Log Loss} = -\frac{1}{n} \sum_{i=1}^n \left[ y_i \log \hat{p}_i + (1-y_i
 
 Логрегрессия обучается именно минимизацией Log Loss. Подставив $\hat{p} = \sigma(w^\top x)$:
 
-$$\mathcal{L} = -\frac{1}{n}\sum_i \left[ y_i \log \sigma(w^\top x_i) + (1-y_i) \log(1 - \sigma(w^\top x_i)) \right]$$
+$$\Large \mathcal{L} = -\frac{1}{n}\sum_i \left[ y_i \log \sigma(w^\top x_i) + (1-y_i) \log(1 - \sigma(w^\top x_i)) \right]$$
 
 Это выпуклая функция по $w$ → гарантирован глобальный минимум.
 
