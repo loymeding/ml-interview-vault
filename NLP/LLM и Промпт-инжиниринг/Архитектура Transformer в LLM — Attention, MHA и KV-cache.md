@@ -11,8 +11,10 @@ tags: [nlp, llm, transformer, self-attention, multi-head-attention, kv-cache, mq
 предпосылки:
   - "Механизм внимания (Attention и Self-Attention)"
 связано:
+  - "Архитектура Transformer — энкодер, декодер и слои"
   - "Эволюция и архитектура LLaMA"
   - "Современные LLM (BERT vs GPT) — тонкости обучения"
+  - "Быстрая генерация LLM — batching, prefill, KV-cache и speculative decoding"
 сравнить-с:
   - "LSTM и GRU"
 ---
@@ -166,6 +168,7 @@ $$\Large \text{KV memory} \approx 2 \cdot L \cdot T \cdot n_{\text{kv}} \cdot d_
 
 ## Связано
 
+- [[NLP/Модели и архитектуры/Архитектура Transformer — энкодер, декодер и слои]]
 - [[NLP/LLM и Промпт-инжиниринг/Эволюция и архитектура LLaMA]]
 - [[NLP/LLM и Промпт-инжиниринг/Современные LLM (BERT vs GPT) — тонкости обучения]]
 

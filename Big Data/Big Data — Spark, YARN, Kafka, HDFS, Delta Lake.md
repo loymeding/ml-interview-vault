@@ -11,6 +11,7 @@ tags: [big-data, spark, yarn, kafka, hdfs, delta-lake, s3, acid]
 предпосылки: []
 связано:
   - "PySpark — DataFrame, lazy evaluation, joins и execution model"
+  - "PySpark — практический пайплайн признаков и оптимизация под ML"
 сравнить-с: []
 ---
 
@@ -155,6 +156,7 @@ $$\Large \text{storage overhead} \approx \text{file size} \times \text{replicati
 ## Связано
 
 - [[Big Data/PySpark — DataFrame, lazy evaluation, joins и execution model]]
+- [[Big Data/PySpark — практический пайплайн признаков и оптимизация под ML|PySpark для ML и задач X5]]
 
 ## Источники
 

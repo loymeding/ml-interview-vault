@@ -1,8 +1,49 @@
 ---
 topic: Python — Параллелизм и Конкурентность
-card_ref: "[[Python — Параллелизм и Конкурентность]]"
+card_ref: "[[Python/Продвинутое/Python — Параллелизм и Конкурентность]]"
 domain: python
-generated: 2026-05-22
+тип: coding-task
+статус: готово
+сложность: высокая
+generated: 2026-08-31
 ---
 
-Failed to authenticate. API Error: 401 {"type":"error","error":{"type":"authentication_error","message":"Invalid authentication credentials"},"request_id":"req_011CbJ9XjSiSiJGCuLtJibJF"}
+# Coding Tasks — конкурентность
+
+Теория: [[Python/Продвинутое/Python — Параллелизм и Конкурентность|карта конкурентности]] и [[Python/Продвинутое/Python — GIL, Threading, Multiprocessing и Asyncio|подробная карточка про GIL и asyncio]]
+
+## T001. Ограниченная загрузка
+
+Есть синхронная функция fetch(url). Напишите функцию fetch_all, которая загружает список URL через ThreadPoolExecutor.
+
+~~~python
+def fetch_all(urls, max_workers=10):
+    pass
+~~~
+
+Требования:
+
+- не создавать поток на каждый URL;
+- сохранить порядок результатов;
+- обработать исключение одного запроса;
+- объяснить, почему это I/O-bound задача;
+- добавить таймаут, если его поддерживает клиент.
+
+Follow-up: как изменить решение для async HTTP-клиента.
+
+## T002. Асинхронная агрегация
+
+Даны асинхронные функции search, load_profile и load_history. Напишите функцию, которая запускает их конкурентно, ограничивает число одновременных вызовов и возвращает частичный результат при падении history.
+
+~~~python
+async def aggregate(user_id, limit=20):
+    pass
+~~~
+
+Обсудите asyncio.gather, Semaphore, timeout и отмену задач.
+
+## T003. CPU-bound обработка
+
+Есть функция transform_document, которая выполняет тяжёлый чистый Python-расчёт. Выберите между потоком и процессом, напишите схему через ProcessPoolExecutor и объясните цену сериализации.
+
+Отдельно назовите случай, когда NumPy или PyTorch могут работать параллельно в потоках, несмотря на GIL.

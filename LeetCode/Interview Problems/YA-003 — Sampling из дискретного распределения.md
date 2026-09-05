@@ -1,8 +1,13 @@
 ---
-tags: [interview-problem, algorithms, yandex, probability]
-cssclasses: [problem-card]
+tags:
+  - interview-problem
+  - algorithms
+  - yandex
+  - probability
+cssclasses:
+  - problem-card
 интервью: true
-статус: не решено
+статус: решено
 источник: yandex-custom
 платформа: Custom
 номер: YA-003
@@ -44,8 +49,8 @@ cumsum:    0.1  0.4  0.8  1.0
 
 ## ✅ Прогресс
 
-- [ ] Решал сам
-- [ ] Решил без подсказки
+- [x] Решал сам ✅ 2026-06-17
+- [x] Решил без подсказки ✅ 2026-06-17
 - [ ] Разобрал оптимальное решение
 - [ ] Повторить
 

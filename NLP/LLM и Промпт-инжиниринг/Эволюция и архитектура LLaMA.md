@@ -16,6 +16,7 @@ tags: [nlp, llm, llama, meta-ai, open-source, rmsnorm, swiglu, rope, gqa, kv-cac
   - "Современные LLM (BERT vs GPT) — тонкости обучения"
   - "Сжатие языковых моделей (Distillation, Quantization, Pruning, LoRA)"
   - "Безопасность и Интерпретируемость LLM (XAI, Fake Detection, Watermarking)"
+  - "Layer Normalization"
 сравнить-с:
   - "GPT-3 — Sparse Attention и In-Context Learning"
 cssclasses: [wide-page]
@@ -58,6 +59,8 @@ LayerNorm нормирует вектор, вычитая среднее и де
 - меньше вычислений
 - проще реализация
 - хорошо работает в больших decoder-only LLM
+
+Подробнее про базовую идею, от которой отталкивается RMSNorm: [[Deep Learning/Обучение/Layer Normalization|Layer Normalization]].
 
 ### 4. SwiGLU в Feed-Forward блоке
 

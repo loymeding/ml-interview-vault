@@ -16,6 +16,7 @@ tags: [нейронные-сети, нормализация, batch-normalizatio
   - "Алгоритмы градиентного спуска"
 связано:
   - "Сверточные нейронные сети (CNN)"
+  - "Layer Normalization"
 сравнить-с: []
 ---
 
@@ -59,6 +60,8 @@ tags: [нейронные-сети, нормализация, batch-normalizatio
 | BatchNorm | канал по батчу | да | CNN-классификация |
 | LayerNorm | признаки одного объекта/токена | нет | Transformers, RNN |
 | GroupNorm | группы каналов одного объекта | нет | CV при маленьких батчах |
+
+Подробнее про LayerNorm: [[Deep Learning/Обучение/Layer Normalization|Layer Normalization]].
 
 ### Что такое running mean и running variance
 

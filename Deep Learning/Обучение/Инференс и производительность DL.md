@@ -15,6 +15,8 @@ tags: [deep-learning, inference, production, gpu, cuda, latency, throughput, qua
 связано:
   - "Алгоритмы оптимизации (SGD, Momentum, RMSProp, Adam)"
   - "Сжатие языковых моделей (Distillation, Quantization, Pruning, LoRA)"
+  - "Быстрая генерация LLM — batching, prefill, KV-cache и speculative decoding"
+  - "Форматы хранения и экспорта моделей — ONNX, safetensors, TorchScript и GGUF"
 сравнить-с: []
 cssclasses: [wide-page]
 ---
@@ -35,6 +37,8 @@ cssclasses: [wide-page]
 - используют `torch.no_grad()` или `torch.inference_mode()`, чтобы не строить граф autograd;
 - часто применяют mixed precision, TorchScript/ONNX/TensorRT, quantization или pruning;
 - фиксируют версию модели и препроцессинга.
+
+Подробнее про выбор формата модели: [[Deep Learning/Практика и инструменты/Форматы хранения и экспорта моделей — ONNX, safetensors, TorchScript и GGUF|Форматы хранения и экспорта моделей]].
 
 Inference быстрее, потому что нет backward pass, градиентов, состояний оптимизатора и хранения промежуточных активаций для обучения.
 
@@ -750,6 +754,8 @@ with torch.inference_mode():
 - [[Deep Learning/Основы/Вычислительный граф и Autograd]]
 - [[Deep Learning/Обучение/Алгоритмы оптимизации (SGD, Momentum, RMSProp, Adam)]]
 - [[NLP/LLM и Промпт-инжиниринг/Сжатие языковых моделей (Distillation, Quantization, Pruning, LoRA)]]
+- [[NLP/LLM и Промпт-инжиниринг/Быстрая генерация LLM — batching, prefill, KV-cache и speculative decoding]]
+- [[Deep Learning/Практика и инструменты/Форматы хранения и экспорта моделей — ONNX, safetensors, TorchScript и GGUF]]
 
 ---
 [[🗺️ Индекс|Назад к разделу]]

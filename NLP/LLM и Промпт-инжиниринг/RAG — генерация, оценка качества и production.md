@@ -13,6 +13,8 @@ tags: [nlp, llm, rag, generation, evaluation, ragas, mrr, gpu, inference]
 связано:
   - "Инференс и производительность DL"
   - "Decoding и sampling в LLM — Temperature, Top-p, Top-k, Beam Search"
+  - "Быстрая генерация LLM — batching, prefill, KV-cache и speculative decoding"
+  - "Метрики RAG-систем — retrieval, generation, faithfulness и RAGAS"
 сравнить-с: []
 ---
 
@@ -124,6 +126,8 @@ $$\Large M_{\text{KV}} \propto 2 \cdot L \cdot B \cdot S \cdot H_{\text{kv}} \cd
 - paged attention/paged KV-cache;
 - выбрать меньшую модель и усилить RAG/reranking.
 
+Подробнее про serving-оптимизации: [[NLP/LLM и Промпт-инжиниринг/Быстрая генерация LLM — batching, prefill, KV-cache и speculative decoding|Быстрая генерация LLM]].
+
 Главный trade-off: чем сильнее ужимаем модель, тем выше риск потери качества, роста latency или сложности эксплуатации.
 
 ### 6. Как итерировать RAG
@@ -141,6 +145,8 @@ $$\Large M_{\text{KV}} \propto 2 \cdot L \cdot B \cdot S \cdot H_{\text{kv}} \cd
 9. Проверить latency/cost.
 
 ### 7. Метрики RAG
+
+Подробный разбор с формулами и примерами: [[NLP/LLM и Промпт-инжиниринг/Метрики RAG-систем — retrieval, generation, faithfulness и RAGAS|Метрики RAG-систем]].
 
 Retrieval-метрики:
 - `Recall@k`: попал ли релевантный chunk в top-k;
@@ -220,6 +226,7 @@ RAGAS-подобный подход можно натянуть частично
 
 - [[NLP/LLM и Промпт-инжиниринг/RAG — документы, OCR и чанкинг]]
 - [[NLP/LLM и Промпт-инжиниринг/RAG — retrieval, hybrid search, RRF и embeddings]]
+- [[NLP/LLM и Промпт-инжиниринг/Метрики RAG-систем — retrieval, generation, faithfulness и RAGAS]]
 - [[Deep Learning/Обучение/Инференс и производительность DL]]
 
 ## Источники

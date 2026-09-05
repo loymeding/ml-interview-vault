@@ -175,6 +175,7 @@ local join on each executor
 ## Связано
 
 - [[Вопросы для МОК-Собеседований/Interview Questions/Pandas и PySpark]]
+- [[Big Data/PySpark — практический пайплайн признаков и оптимизация под ML|Практический PySpark для ML-пайплайна]]
 
 ## Источники
 

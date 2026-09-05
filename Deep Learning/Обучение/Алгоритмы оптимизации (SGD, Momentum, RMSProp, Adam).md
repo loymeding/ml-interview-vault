@@ -1,5 +1,5 @@
 ---
-tags: [deep-learning, оптимизация, sgd, momentum, adam, rmsprop, lr-scheduler, pytorch]
+tags: [deep-learning, оптимизация, sgd, momentum, adam, adamw, lamb, lans, rmsprop, lr-scheduler, pytorch]
 тип: теория
 уровень: middle
 сложность: средняя
@@ -10,6 +10,9 @@ tags: [deep-learning, оптимизация, sgd, momentum, adam, rmsprop, lr-s
   - "Интенсив Основы глубокого обучения 4 Радослав Нейчев MADE"
   - "Семинар. PyTorch. Оптимизаторы"
   - "Алгоритмы градиентного спуска"
+  - "Decoupled Weight Decay Regularization — Loshchilov, Hutter"
+  - "Large Batch Optimization for Deep Learning: Training BERT in 76 minutes — You et al."
+  - "Accelerated Large Batch Optimization of BERT Pretraining in 54 minutes — Zheng et al."
 предпосылки:
   - "Градиентный спуск"
   - "Метод обратного распространения ошибки (Backpropagation)"
@@ -22,7 +25,7 @@ tags: [deep-learning, оптимизация, sgd, momentum, adam, rmsprop, lr-s
 # Продвинутые методы оптимизации (от SGD до AdamW)
 
 > [!abstract] Суть
-> Чистый SGD плохо справляется со сложными поверхностями (седловыми точками и узкими «оврагами»). Momentum накапливает историю шагов, работая как тяжёлый катящийся шар. RMSprop адаптирует learning rate для каждого параметра. Adam объединяет оба подхода и является золотым стандартом. Для финальной сходимости применяется динамическое расписание шага (LR Schedulers).
+> Чистый SGD плохо справляется со сложными поверхностями (седловыми точками и узкими «оврагами»). Momentum накапливает историю шагов, RMSprop адаптирует learning rate для каждого параметра, Adam объединяет оба подхода. В современных Transformer/LLM чаще используют **AdamW**, потому что он корректно отделяет weight decay от адаптивного шага Adam. Для очень больших distributed batch существуют layer-wise оптимизаторы вроде **LAMB** и исследовательские варианты вроде **LANS**.
 
 ## Ответ
 
@@ -53,6 +56,246 @@ $$\Large \theta = \theta - \eta v_t$$
 ### 4. Adam (Adaptive Moment Estimation)
 
 Объединяет Momentum (первый момент $m_t$) и RMSprop (второй момент $v_t$). Стандарт индустрии.
+
+Пусть:
+
+$$\Large g_t = \nabla_{\theta}L_t(\theta_t)$$
+
+где:
+- $g_t$ — градиент loss по параметрам на шаге $t$
+- $\theta_t$ — параметры модели на шаге $t$
+- $L_t$ — loss на текущем mini-batch
+
+Adam хранит два экспоненциальных скользящих средних:
+
+$$\Large m_t = \beta_1 m_{t-1} + (1-\beta_1)g_t$$
+
+$$\Large v_t = \beta_2 v_{t-1} + (1-\beta_2)(g_t \odot g_t)$$
+
+где:
+- $m_t$ — первый момент, сглаженное направление градиента; это momentum-часть
+- $v_t$ — второй момент, сглаженный квадрат градиента; это RMSProp-часть
+- $\beta_1$ — скорость забывания для первого момента, часто `0.9`
+- $\beta_2$ — скорость забывания для второго момента, часто `0.999`
+- $\odot$ — поэлементное умножение
+
+Так как $m_0 = 0$ и $v_0 = 0$, в начале оценки смещены к нулю. Поэтому используют bias correction:
+
+$$\Large \hat{m}_t = \frac{m_t}{1-\beta_1^t}, \qquad \hat{v}_t = \frac{v_t}{1-\beta_2^t}$$
+
+И сам шаг:
+
+$$\Large \theta_{t+1} = \theta_t - \eta_t \frac{\hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}$$
+
+где:
+- $\eta_t$ — текущий learning rate, возможно после scheduler
+- $\epsilon$ — маленькая константа для численной стабильности, часто `1e-8`
+- $\frac{1}{\sqrt{\hat{v}_t}+\epsilon}$ — адаптивное поэлементное масштабирование шага
+
+Интуиция: если у параметра долго большие градиенты, Adam уменьшает для него эффективный шаг; если градиенты маленькие, шаг относительно увеличивается.
+
+### 4.1 AdamW (Adam with Decoupled Weight Decay)
+
+> [!important] Главное отличие
+> **AdamW — это не просто Adam + L2-регуляризация.** В AdamW weight decay применяется отдельно к весам, а не добавляется внутрь градиента перед адаптивным масштабированием.
+
+Если добавить L2-регуляризацию в обычный Adam через градиент, получится:
+
+$$\Large g_t^{L2} = \nabla_{\theta}L_t(\theta_t) + \lambda\theta_t$$
+
+где:
+- $g_t^{L2}$ — градиент loss вместе с L2-штрафом
+- $\lambda$ — коэффициент регуляризации
+- $\theta_t$ — текущие веса
+
+Проблема: Adam потом делит весь $g_t^{L2}$ на $\sqrt{\hat{v}_t}+\epsilon$. Значит, регуляризация тоже становится **адаптивной по координатам**: один вес штрафуется сильнее, другой слабее, потому что у них разные истории градиентов. В SGD L2 и weight decay почти эквивалентны, а в Adam — уже нет.
+
+AdamW отделяет shrinkage весов от направления градиентного шага:
+
+$$\Large u_t = \frac{\hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}$$
+
+$$\Large \theta_{t+1} = (1-\eta_t\lambda)\theta_t - \eta_t u_t$$
+
+где:
+- $u_t$ — Adam-направление, полученное только из градиента loss
+- $(1-\eta_t\lambda)\theta_t$ — отдельное уменьшение нормы весов
+- $\lambda$ — weight decay
+- $\eta_t$ — learning rate
+
+То есть AdamW делает две разные вещи:
+1. **Adam-шаг:** идёт в сторону уменьшения loss.
+2. **Weight decay:** слегка тянет веса к нулю пропорционально их величине.
+
+**Практическая интерпретация:** AdamW обычно даёт более стабильную регуляризацию и лучшее обобщение, особенно в Transformer, BERT-like моделях, LLM fine-tuning и CV-моделях с Adam-family optimizer.
+
+**Что обычно не decay-ят:**
+- bias-параметры
+- веса `LayerNorm`, `BatchNorm`, `RMSNorm`
+- иногда embedding-таблицы и output head, если есть причина сохранить масштаб представлений
+
+Пример разделения параметров в PyTorch:
+
+```python
+import torch
+
+decay_params = []
+no_decay_params = []
+
+for name, param in model.named_parameters():
+    if not param.requires_grad:
+        continue
+    if name.endswith("bias") or "norm" in name.lower():
+        no_decay_params.append(param)
+    else:
+        decay_params.append(param)
+
+optimizer = torch.optim.AdamW(
+    [
+        {"params": decay_params, "weight_decay": 0.01},
+        {"params": no_decay_params, "weight_decay": 0.0},
+    ],
+    lr=2e-5,
+    betas=(0.9, 0.999),
+    eps=1e-8,
+)
+```
+
+**Типичные настройки:**
+- BERT fine-tuning: `lr=1e-5...5e-5`, `weight_decay=0.01`, warmup `5-10%`
+- обучение Transformer/LLM с нуля: `betas=(0.9, 0.95)` или близко к этому, `weight_decay=0.01...0.1`, cosine schedule + warmup
+- small tabular/network tasks: часто достаточно AdamW с `lr=1e-3` и небольшим decay
+
+### 4.2 LAMB (Layer-wise Adaptive Moments)
+
+LAMB — это оптимизатор для **large-batch distributed training**. Его смысл: AdamW хорошо адаптирует шаг по координатам, но при огромном batch size разные слои могут получать обновления слишком разного относительного масштаба. LAMB добавляет **layer-wise trust ratio**: каждый слой получает шаг, соразмерный норме его собственных весов.
+
+Разобьём параметры на блоки/слои $\mathcal{G}_b$:
+
+$$\Large \theta_t = [\theta_{t,\mathcal{G}_1}, \theta_{t,\mathcal{G}_2}, \ldots, \theta_{t,\mathcal{G}_B}]$$
+
+где:
+- $\mathcal{G}_b$ — блок параметров, например матрица весов слоя
+- $B$ — число блоков
+- $\theta_{t,\mathcal{G}_b}$ — параметры блока $b$
+
+Сначала LAMB считает Adam-подобные моменты по блоку:
+
+$$\Large m_{t,\mathcal{G}_b} = \beta_1m_{t-1,\mathcal{G}_b} + (1-\beta_1)g_{t,\mathcal{G}_b}$$
+
+$$\Large v_{t,\mathcal{G}_b} = \beta_2v_{t-1,\mathcal{G}_b} + (1-\beta_2)g_{t,\mathcal{G}_b}^2$$
+
+$$\Large r_{t,\mathcal{G}_b} = \frac{\hat{m}_{t,\mathcal{G}_b}}{\sqrt{\hat{v}_{t,\mathcal{G}_b}}+\epsilon}$$
+
+Дальше формируется направление обновления с weight decay:
+
+$$\Large u_{t,\mathcal{G}_b} = r_{t,\mathcal{G}_b} + \lambda\theta_{t,\mathcal{G}_b}$$
+
+И считается trust ratio:
+
+$$\Large \rho_{t,\mathcal{G}_b} = \frac{\phi(\|\theta_{t,\mathcal{G}_b}\|_2)}{\|u_{t,\mathcal{G}_b}\|_2}$$
+
+Итоговый шаг:
+
+$$\Large \theta_{t+1,\mathcal{G}_b} = \theta_{t,\mathcal{G}_b} - \eta_t \rho_{t,\mathcal{G}_b}u_{t,\mathcal{G}_b}$$
+
+где:
+- $r_{t,\mathcal{G}_b}$ — Adam-направление для блока
+- $u_{t,\mathcal{G}_b}$ — направление с weight decay
+- $\rho_{t,\mathcal{G}_b}$ — trust ratio, коэффициент доверия к обновлению слоя
+- $\phi(\cdot)$ — функция масштабирования нормы; на практике часто identity, то есть $\phi(x)=x$
+
+**Интуиция на пальцах:** если у слоя норма весов $10$, а норма обновления $0.1$, trust ratio будет большим и шаг усилится. Если у слоя норма весов $0.01$, а обновление $1.0$, trust ratio будет маленьким и шаг притормозится. Так LAMB стабилизирует относительный размер шага по слоям.
+
+**Где используют:**
+- pretraining BERT/Transformer на очень больших batch size
+- distributed training на сотнях/тысячах GPU/TPU
+- ситуации, где AdamW начинает деградировать при агрессивном увеличении batch size
+
+**Где обычно не нужен:**
+- обычный fine-tuning BERT/LLM на одной GPU
+- LoRA/QLoRA fine-tuning
+- небольшие CNN/MLP, где batch size умеренный
+
+Пример с внешней реализацией:
+
+```python
+# В обычном torch.optim LAMB нет.
+# Часто используют DeepSpeed, NVIDIA Apex, bitsandbytes или pytorch-optimizer.
+
+from pytorch_optimizer import Lamb
+
+optimizer = Lamb(
+    model.parameters(),
+    lr=1e-3,
+    betas=(0.9, 0.999),
+    weight_decay=0.01,
+)
+```
+
+### 4.3 LANS — не Lookahead + Noisy Student
+
+> [!warning] Не путать
+> В найденных первоисточниках **LANS** — это не `Lookahead with Noisy Student`. LANS описан как accelerated large-batch optimizer для BERT pretraining: он добавляет к LAMB **per-block gradient normalization** и **Nesterov-style momentum**.
+> **Noisy Student** — это semi-supervised/self-training подход: teacher размечает unlabeled data, student обучается на pseudo-labels с шумом. Это не оптимизатор.
+
+LANS начинает с нормализации градиента в каждом блоке:
+
+$$\Large \tilde{g}_{t,\mathcal{G}_b} =
+\frac{g_{t,\mathcal{G}_b}}{\|g_{t,\mathcal{G}_b}\|_2 + \epsilon_g}$$
+
+где:
+- $\tilde{g}_{t,\mathcal{G}_b}$ — нормализованный градиент блока
+- $g_{t,\mathcal{G}_b}$ — обычный mini-batch gradient блока
+- $\epsilon_g$ — маленькая константа для защиты от деления на ноль
+
+Дальше моменты считаются уже по нормализованному градиенту:
+
+$$\Large m_{t,\mathcal{G}_b} =
+\beta_1m_{t-1,\mathcal{G}_b} + (1-\beta_1)\tilde{g}_{t,\mathcal{G}_b}$$
+
+$$\Large v_{t,\mathcal{G}_b} =
+\beta_2v_{t-1,\mathcal{G}_b} + (1-\beta_2)\tilde{g}_{t,\mathcal{G}_b}^{2}$$
+
+Определяются два направления:
+
+$$\Large r_{t,\mathcal{G}_b} =
+\frac{\hat{m}_{t,\mathcal{G}_b}}{\sqrt{\hat{v}_{t,\mathcal{G}_b}}+\epsilon}$$
+
+$$\Large c_{t,\mathcal{G}_b} =
+\frac{\tilde{g}_{t,\mathcal{G}_b}}{\sqrt{\hat{v}_{t,\mathcal{G}_b}}+\epsilon}$$
+
+где:
+- $r_{t,\mathcal{G}_b}$ — Adam/LAMB-like направление с первым моментом
+- $c_{t,\mathcal{G}_b}$ — направление по текущему нормализованному градиенту без накопленного первого момента
+
+Упрощённо, LANS строит выпуклую смесь двух нормированных направлений:
+
+$$\Large
+d_{t,\mathcal{G}_b}
+=
+\phi(\|\theta_{t,\mathcal{G}_b}\|_2)
+\left[
+\beta_1
+\frac{r_{t,\mathcal{G}_b}+\lambda\theta_{t,\mathcal{G}_b}}
+{\|r_{t,\mathcal{G}_b}+\lambda\theta_{t,\mathcal{G}_b}\|_2}
++
+(1-\beta_1)
+\frac{c_{t,\mathcal{G}_b}+\lambda\theta_{t,\mathcal{G}_b}}
+{\|c_{t,\mathcal{G}_b}+\lambda\theta_{t,\mathcal{G}_b}\|_2}
+\right]
+$$
+
+$$\Large \theta_{t+1,\mathcal{G}_b} =
+\theta_{t,\mathcal{G}_b} - \eta_t d_{t,\mathcal{G}_b}$$
+
+где:
+- $d_{t,\mathcal{G}_b}$ — итоговое направление LANS для блока
+- первая часть смеси похожа на LAMB с momentum
+- вторая часть добавляет Nesterov-like коррекцию через текущий нормализованный градиент
+
+**Зачем это сделали:** при экстремально больших batch size простой рост learning rate перестаёт работать: LR ограничен кривизной/lipschitz-like ограничениями, и обучение начинает расходиться. LANS пытается сделать шаги более устойчивыми за счёт нормализации градиента и Nesterov-style направления. В эксперименте авторов LANS масштабировал BERT pretraining до batch size `96K/33K`, где LAMB при таком режиме расходился.
+
+**Практический вывод:** LANS — нишевый large-batch optimizer. Для обычного обучения и fine-tuning почти всегда разумнее начать с AdamW; LAMB/LANS имеют смысл, когда реально есть distributed pretraining и проблема масштабирования batch size.
 
 ### 5. Nesterov
 
@@ -112,6 +355,24 @@ Batch size выбирают как компромисс:
 - не ломает BatchNorm, если он используется.
 
 Если GPU простаивает, batch size можно увеличить. Если качество падает при large batch, стоит добавить warmup, изменить LR schedule, включить gradient accumulation или вернуться к меньшему effective batch.
+
+### 6.4 Сводная таблица: какой оптимизатор когда выбирать
+
+| Оптимизатор | Главная идея | Где чаще используют | Плюсы | Минусы и нюансы |
+|---|---|---|---|---|
+| **SGD** | простой шаг по mini-batch gradient | классика, convex/простые модели, иногда финальное CV-обучение | мало памяти, хороший baseline, шум может помогать generalization | медленно сходится, чувствителен к LR и scale признаков |
+| **SGD + Momentum** | сглаживает направление через накопленный импульс | CNN, CV, обучение с большим числом эпох | часто лучше обобщает, чем Adam; дешёвый по памяти | требует аккуратного scheduler, дольше выходит на хороший loss |
+| **RMSProp** | адаптивный LR через квадрат градиентов | исторически RNN/RL, нестабильные градиенты | меньше осцилляций по координатам с большим gradient scale | реже default в современных Transformer |
+| **Adam** | Momentum + RMSProp | быстрый baseline почти для любой DL-задачи | быстро снижает train loss, мало ручного тюнинга | с L2/weight decay есть тонкая ловушка; иногда хуже generalization |
+| **AdamW** | Adam + decoupled weight decay | Transformer, BERT, LLM, ViT, fine-tuning | стандартный modern default, лучше контролирует регуляризацию | нужно правильно исключать bias/norm из decay; важны warmup и scheduler |
+| **LAMB** | Adam-like update + layer-wise trust ratio | large-batch BERT/Transformer pretraining | помогает масштабировать batch size, выравнивает относительные шаги слоёв | лишняя сложность; обычно не нужен для small/medium fine-tuning |
+| **LANS** | LAMB + block gradient normalization + Nesterov-style mixture | экстремальный distributed BERT pretraining | может держать ещё больший batch size, где LAMB расходится | исследовательский/нишевый метод, мало стандартных реализаций |
+| **Lookahead** | wrapper: быстрые веса делают $k$ шагов, медленные подтягиваются | иногда поверх SGD/Adam/RAdam/Ranger | снижает variance inner optimizer, может стабилизировать обучение | не заменяет выбор базового optimizer; не связан с Noisy Student |
+
+> [!tip] Быстрое правило
+> Если нет особой причины, начинай с **AdamW + warmup + cosine/linear decay**.
+> Переходи к **SGD+Momentum**, если важна финальная generalization в CV и есть бюджет на долгую тренировку.
+> Смотри на **LAMB/LANS**, только если у тебя действительно large-batch distributed pretraining.
 
 ### 7. Методы второго порядка (Newton, L-BFGS) и почему они редко в DL
 Методы второго порядка (например, метод Ньютона) используют не только градиент (направление), но и **матрицу Гессе** (кривизну поверхности), что позволяет делать огромные и точные шаги прямо в минимум.
@@ -194,14 +455,50 @@ $$\Large v_t = \beta v_{t-1} + (1-\beta)g_t, \qquad \theta \leftarrow \theta - \
 
 **Adam:**
 
-$$\Large \theta \leftarrow \theta - \frac{\eta \hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$
+$$\Large m_t = \beta_1m_{t-1} + (1-\beta_1)g_t$$
+
+$$\Large v_t = \beta_2v_{t-1} + (1-\beta_2)g_t^2$$
+
+$$\Large \theta_{t+1} = \theta_t - \eta_t\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$
 
 где:
+- $g_t$ — текущий градиент
 - $\hat{m}_t$ — скорректированное скользящее среднее градиента (первый момент)
 - $\hat{v}_t$ — скорректированное скользящее среднее квадрата градиента (второй момент)
 - $\epsilon$ — малая константа для стабильности ($\sim 10^{-8}$)
 
-**Weight Decay** в PyTorch: $\theta = (1 - \lambda)\theta - \eta \nabla L$.
+**Adam + L2-регуляризация:**
+
+$$\Large g_t^{L2} = \nabla_{\theta}L_t(\theta_t) + \lambda\theta_t$$
+
+Здесь $\lambda\theta_t$ попадает внутрь Adam-моментов и адаптивного деления на $\sqrt{\hat{v}_t}$.
+
+**AdamW / decoupled weight decay:**
+
+$$\Large u_t = \frac{\hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}$$
+
+$$\Large \theta_{t+1} = (1-\eta_t\lambda)\theta_t - \eta_t u_t$$
+
+Здесь weight decay применяется напрямую к весам и не смешивается с gradient history.
+
+**LAMB trust ratio для блока $\mathcal{G}_b$:**
+
+$$\Large \rho_{t,\mathcal{G}_b} =
+\frac{\phi(\|\theta_{t,\mathcal{G}_b}\|_2)}
+{\left\|\frac{\hat{m}_{t,\mathcal{G}_b}}{\sqrt{\hat{v}_{t,\mathcal{G}_b}}+\epsilon} + \lambda\theta_{t,\mathcal{G}_b}\right\|_2}$$
+
+$$\Large \theta_{t+1,\mathcal{G}_b}
+=
+\theta_{t,\mathcal{G}_b}
+-
+\eta_t\rho_{t,\mathcal{G}_b}
+\left(
+\frac{\hat{m}_{t,\mathcal{G}_b}}{\sqrt{\hat{v}_{t,\mathcal{G}_b}}+\epsilon}
++
+\lambda\theta_{t,\mathcal{G}_b}
+\right)$$
+
+где $\rho_{t,\mathcal{G}_b}$ масштабирует шаг слоя относительно нормы его весов.
 
 **Gradient Clipping (Norm Clipping):**
 $$\Large \mathbf{g} \leftarrow \mathbf{g} \cdot \frac{\text{max\_norm}}{\|\mathbf{g}\|_2}, \quad \text{если } \|\mathbf{g}\|_2 > \text{max\_norm}$$
@@ -213,26 +510,88 @@ $$\Large \mathbf{g} \leftarrow \mathbf{g} \cdot \frac{\text{max\_norm}}{\|\mathb
 
 ## Короткий пример
 
-```python
-import torch.optim as optim
+### AdamW для Transformer/BERT fine-tuning
 
-optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
+```python
+import torch
+
+decay_params = []
+no_decay_params = []
+
+for name, param in model.named_parameters():
+    if not param.requires_grad:
+        continue
+    if name.endswith("bias") or "norm" in name.lower():
+        no_decay_params.append(param)
+    else:
+        decay_params.append(param)
+
+optimizer = torch.optim.AdamW(
+    [
+        {"params": decay_params, "weight_decay": 0.01},
+        {"params": no_decay_params, "weight_decay": 0.0},
+    ],
+    lr=2e-5,
+    betas=(0.9, 0.999),
+)
 
 for epoch in range(100):
     for batch in dataloader:
         optimizer.zero_grad()
+        loss = compute_loss(model, batch)
         loss.backward()
         optimizer.step()
-    scheduler.step()  # Один раз в ЭПОХУ, не в батче!
 ```
+
+### AdamW + scheduler
+
+```python
+optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.1)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    optimizer,
+    T_max=num_training_steps,
+)
+
+for batch in dataloader:
+    optimizer.zero_grad()
+    loss = compute_loss(model, batch)
+    loss.backward()
+    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+    optimizer.step()
+    scheduler.step()  # Если scheduler рассчитан на шаги, а не эпохи
+```
+
+> [!warning] Scheduler зависит от того, как он задан
+> `StepLR` часто вызывают раз в эпоху, а `CosineAnnealingLR`/linear warmup в Transformer-пайплайнах часто вызывают раз в optimizer step. Ошибка не в самом месте вызова, а в несоответствии между scheduler и ожидаемой единицей времени.
+
+### LAMB для large-batch pretraining
+
+```python
+# В torch.optim обычно нет LAMB из коробки.
+# Пример с внешней библиотекой pytorch-optimizer:
+
+from pytorch_optimizer import Lamb
+
+optimizer = Lamb(
+    model.parameters(),
+    lr=1e-3,
+    betas=(0.9, 0.999),
+    weight_decay=0.01,
+)
+```
+
+LAMB имеет смысл проверять, когда effective batch size уже очень большой и AdamW начинает терять качество или нестабильно масштабируется.
 
 ## Типичные ошибки
 
-- **`scheduler.step()` внутри цикла по батчам:** LR обнулится за первую эпоху. Scheduler вызывают один раз за эпоху, после всех батчей.
+- **Вызывать `scheduler.step()` не в той единице времени:** `StepLR` часто ожидает вызов раз в эпоху, а warmup/linear/cosine scheduler для Transformer часто ожидает вызов раз в optimizer step. Нужно смотреть, на что рассчитан `T_max`, `num_training_steps` или `step_size`.
 - **Забыть про VRAM для Adam:** Adam хранит два момента для каждого параметра → потребление памяти в **3 раза** больше, чем у SGD.
 - **Не применять Gradient Clipping в RNN:** В рекуррентных сетях взрыв градиентов — системная проблема, а не редкость. `clip_grad_norm_` — обязательная строка для любого LSTM/GRU-обучения.
 - **Вызывать `clip_grad_norm_()` до `.backward()`:** Градиенты ещё не вычислены — вызов бессмысленен. Правильный порядок: `loss.backward()` → `clip_grad_norm_()` → `optimizer.step()`.
+- **Считать `Adam(weight_decay=...)` и AdamW одним и тем же:** в Adam L2-штраф проходит через адаптивное масштабирование, в AdamW decay отделён от gradient update.
+- **Decay-ить bias и normalization weights:** часто ухудшает качество, особенно в Transformer. Для `bias`, `LayerNorm`, `BatchNorm`, `RMSNorm` обычно ставят `weight_decay=0`.
+- **Ждать магии от LAMB на маленьком fine-tuning:** LAMB создан прежде всего для large-batch distributed pretraining; на обычном fine-tuning он часто не даёт выигрыша.
+- **Называть LANS `Lookahead + Noisy Student`:** это неверная связка. LANS — large-batch optimizer из семейства LAMB; Noisy Student — semi-supervised training pipeline.
 
 ## Каверзные вопросы
 
@@ -243,7 +602,10 @@ for epoch in range(100):
 
 - За счёт чего Momentum «выскакивает» из локальных ям?
 - Какую проблему решает деление на $\sqrt{\hat{v}_t}$ в Adam?
-- Как добавить L2-регуляризацию в PyTorch?
+- Чем AdamW отличается от Adam с L2-регуляризацией?
+- Почему bias и LayerNorm weights часто исключают из weight decay?
+- Что такое trust ratio в LAMB и зачем он нужен при large batch training?
+- Почему LANS не стоит объяснять как Lookahead + Noisy Student?
 
 ## Предпосылки
 
@@ -258,6 +620,12 @@ for epoch in range(100):
 ## Источники
 
 - Интенсив Основы глубокого обучения 4 Радослав Нейчев MADE
+- [Decoupled Weight Decay Regularization — Loshchilov, Hutter](https://arxiv.org/abs/1711.05101)
+- [Large Batch Optimization for Deep Learning: Training BERT in 76 minutes — You et al.](https://arxiv.org/abs/1904.00962)
+- [Accelerated Large Batch Optimization of BERT Pretraining in 54 minutes — Zheng et al.](https://arxiv.org/abs/2006.13484)
+- [Lookahead Optimizer: k steps forward, 1 step back — Zhang et al.](https://arxiv.org/abs/1907.08610)
+- [Self-training with Noisy Student improves ImageNet classification — Xie et al.](https://arxiv.org/abs/1911.04252)
+- [PyTorch AdamW documentation](https://docs.pytorch.org/docs/stable/generated/torch.optim.adamw.AdamW_class.html)
 - Семинар. PyTorch. Оптимизаторы
 - Алгоритмы градиентного спуска
 

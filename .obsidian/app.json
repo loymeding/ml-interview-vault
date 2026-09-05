@@ -1,3 +1,4 @@
 {
-  "openBehavior": "file:🏠 База знаний"
+  "openBehavior": "file:🏠 База знаний",
+  "readableLineLength": false
 }

@@ -13,6 +13,7 @@ tags: [nlp, llm, gpt-2, zero-shot, prompting, webtext, bpe, pre-layernorm]
 связано:
   - "GPT-3 — Sparse Attention и In-Context Learning"
   - "Системные и специальные токены в языковых моделях"
+  - "Layer Normalization"
 сравнить-с:
   - "Transfer Learning в NLP и семейство BERT"
 ---
@@ -37,6 +38,8 @@ tags: [nlp, llm, gpt-2, zero-shot, prompting, webtext, bpe, pre-layernorm]
 GPT-2 перенёс нормализацию **перед** каждым подблоком (Pre-LayerNorm).
 
 Эффект: возникает единый **сквозной Residual Stream**, в который блоки просто вносят небольшие итеративные добавки. Это делает Трансформер поразительно похожим на **градиентный бустинг** — каждый блок лишь корректирует предыдущее предсказание.
+
+Подробнее про механику самой нормализации: [[Deep Learning/Обучение/Layer Normalization|Layer Normalization]].
 
 ### 3. Масштабированная инициализация весов
 

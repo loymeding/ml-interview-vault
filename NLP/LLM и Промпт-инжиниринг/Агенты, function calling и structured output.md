@@ -12,6 +12,8 @@ tags: [llm, agents, rag, function-calling, structured-output, observability, lan
   - "RAG — retrieval, hybrid search, RRF и embeddings"
 связано:
   - "RAG — генерация, оценка качества и production"
+  - "Оценка LLM-ответов — relevance, completeness, factuality и safety"
+  - "LLM-as-a-Judge — rubric, bias и дообучение"
 сравнить-с: []
 ---
 
@@ -241,6 +243,95 @@ LLM может инициировать tool use в разных формата�
 
 Для агентского RAG важна не только оценка финального ответа, но и диагностика: агент выбрал неправильный инструмент, плохо переписал запрос, retrieval не нашел источник или генератор проигнорировал контекст.
 
+### 9. Как оценивать многошаговый диалог
+
+Для агента мало проверить один финальный ответ. Нужно оценивать весь trajectory:
+
+```text
+user goal
+  -> agent actions
+  -> tool calls
+  -> observations
+  -> final answer
+  -> task outcome
+```
+
+Основные метрики:
+
+| Метрика | Что означает |
+|---|---|
+| `task success` | решена ли задача пользователя |
+| `step correctness` | правильные ли действия выбрал агент |
+| `tool call accuracy` | правильный ли tool и аргументы |
+| `turn efficiency` | не сделал ли агент лишние шаги |
+| `context retention` | не потерял ли важные детали диалога |
+| `escalation correctness` | вовремя ли передал оператору |
+| `policy compliance` | не нарушил ли правила |
+| `grounded final answer` | финальный ответ следует из tool/context |
+
+Пример rubric для диалога:
+
+```json
+{
+  "task_success": "pass/fail",
+  "wrong_tool_calls": 0,
+  "unnecessary_turns": 1,
+  "missed_clarification": false,
+  "unsafe_action": false,
+  "final_answer_grounded": true
+}
+```
+
+### 10. User simulation и regression testing
+
+Для проверки агента можно использовать scripted-сценарии или LLM user simulator.
+
+Сценарий:
+
+```text
+Goal: пользователь хочет вернуть товар, но потерял упаковку.
+Constraints: пользователь не знает номер заказа, путается в датах.
+Expected behavior: агент задаёт уточняющий вопрос, вызывает order lookup,
+проверяет условия возврата и не обещает деньги без подтверждения.
+```
+
+Зачем это нужно:
+
+- прогонять regression tests перед релизом;
+- проверять редкие сценарии без риска для пользователей;
+- сравнивать prompt/model/tool версии;
+- искать зацикливания и неправильные эскалации.
+
+Нюанс: LLM-симулятор тоже может быть нереалистичным. Он часто слишком кооперативен, поэтому набор симуляций нужно валидировать на реальных логах.
+
+### 11. Failure modes агентских систем
+
+Типовые поломки:
+
+- агент выбрал неправильный tool;
+- вызвал правильный tool с неверными аргументами;
+- галлюцинировал результат API вместо чтения observation;
+- зациклился в ReAct loop;
+- потерял исходную цель пользователя;
+- не задал уточняющий вопрос;
+- слишком рано или слишком поздно эскалировал;
+- раскрыл лишние персональные данные;
+- выполнил опасное действие без подтверждения;
+- игнорировал ограничения из system prompt.
+
+Практическая защита:
+
+```text
+state machine
++ tool permissions
++ argument validation
++ max steps
++ confirmation for risky actions
++ trace logging
++ final answer grounding check
++ fallback/handoff
+```
+
 ## Типичные ошибки
 
 - Давать агенту слишком много инструментов без router/permissions.
@@ -249,6 +340,8 @@ LLM может инициировать tool use в разных формата�
 - Не логировать tool arguments и потом не понимать, почему агент ошибся.
 - Делать свободный ReAct там, где нужен простой state machine.
 - Оценивать только финальный текст без трассировки шагов.
+- Не тестировать агента на multi-turn сценариях с уточнениями, ошибками пользователя и tool failures.
+- Не ограничивать число шагов агента и не иметь fallback при зацикливании.
 
 ## Проверка себя
 
@@ -257,15 +350,20 @@ LLM может инициировать tool use в разных формата�
 - Почему structured output через prompt не гарантирует валидный JSON?
 - Как выглядит цикл function calling?
 - Что смотреть в observability агента?
+- Почему для агента важно оценивать trajectory, а не только final answer?
+- Какие failure modes чаще всего возникают при tool calling?
 
 ## Связано
 
 - [[NLP/LLM и Промпт-инжиниринг/RAG — retrieval, hybrid search, RRF и embeddings]]
 - [[NLP/LLM и Промпт-инжиниринг/RAG — генерация, оценка качества и production]]
+- [[NLP/LLM и Промпт-инжиниринг/Оценка LLM-ответов — relevance, completeness, factuality и safety]]
+- [[NLP/LLM и Промпт-инжиниринг/LLM-as-a-Judge — rubric, bias и дообучение]]
 
 ## Источники
 
 - Sber/Yandex interview notes
+- Текущий чат: подготовка к интервью по агентам, function calling и оценке диалоговых систем
 
 ---
 [[🗺️ Индекс|Назад к разделу]]
